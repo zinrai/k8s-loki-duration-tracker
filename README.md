@@ -2,7 +2,11 @@
 
 This Go program checks the log availability duration for Kubernetes Pods in a specified namespace prefix. It uses the Loki logging system to retrieve the logs and determines how long it takes for the logs to become available after the Pod starts.
 
-**Notice**
+This program uses the `query_range` of the Loki HTTP API.
+
+https://grafana.com/docs/loki/latest/reference/api/#query-logs-within-a-range-of-time
+
+## Futures
 
 This program needs to be run at the same time as [zinrai/k8s-pod-log-generator](https://github.com/zinrai/k8s-loki-logline-verifier), as it calculates the difference between the start time of the k8s Pod and the difference that could be logged from Loki.
 
