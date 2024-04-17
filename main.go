@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"sync"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -35,7 +34,6 @@ type LokiQueryRangeResponse struct {
 			Metric map[string]string `json:"metric"`
 			Values [][]interface{}   `json:"values"`
 		} `json:"result"`
-		Stats struct{} `json:"stats"`
 	} `json:"data"`
 }
 
@@ -45,56 +43,78 @@ type PodInfo struct {
 	StartTime time.Time
 }
 
-func getLogAvailabilityDuration(podInfo PodInfo, lokiAddress string) (time.Duration, error) {
-	startedAt := podInfo.StartTime.UnixNano()
-	end := time.Now().UnixNano()
+type JobQueue struct {
+	podInfoQueue []PodInfo
+	loggedPods   map[string]bool
+}
 
-	query := fmt.Sprintf(`count_over_time({pod_name="%s"}[1h])`, podInfo.PodName)
+func (jq *JobQueue) AddPodToQueue(podInfo PodInfo) {
+	jq.podInfoQueue = append(jq.podInfoQueue, podInfo)
+}
 
-	u, err := url.Parse(fmt.Sprintf("%s/loki/api/v1/query_range", lokiAddress))
-	if err != nil {
-		return 0, err
+func (jq *JobQueue) GetPodFromQueue() (PodInfo, bool) {
+	if len(jq.podInfoQueue) == 0 {
+		return PodInfo{}, false
 	}
+	podInfo := jq.podInfoQueue[0]
+	jq.podInfoQueue = jq.podInfoQueue[1:]
+	return podInfo, true
+}
 
+func (jq *JobQueue) MarkPodAsLogged(podInfo PodInfo) {
+	jq.loggedPods[fmt.Sprintf("%s/%s", podInfo.Namespace, podInfo.PodName)] = true
+}
+
+func (jq *JobQueue) IsPodLogged(podInfo PodInfo) bool {
+	_, ok := jq.loggedPods[fmt.Sprintf("%s/%s", podInfo.Namespace, podInfo.PodName)]
+	return ok
+}
+
+func getLokiLogs(podInfo PodInfo, lokiAddress string) error {
+	startedAt := podInfo.StartTime.UnixNano()
+
+	query := fmt.Sprintf(`{pod_name="%s"}`, podInfo.PodName)
 	params := url.Values{}
 	params.Set("query", query)
 	params.Set("start", strconv.FormatInt(startedAt, 10))
-	params.Set("end", strconv.FormatInt(end, 10))
-	params.Set("step", "1h")
-	u.RawQuery = params.Encode()
+	params.Set("end", strconv.FormatInt(time.Now().UnixNano(), 10))
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	lokiURL := fmt.Sprintf("%s/loki/api/v1/query_range", lokiAddress)
+	req, err := http.NewRequest("GET", lokiURL, nil)
 	if err != nil {
-		return 0, err
+		return err
 	}
+	req.URL.RawQuery = params.Encode()
 	req.Header.Set("X-Scope-OrgID", podInfo.Namespace)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("Loki query failed with status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return 0, err
+		return fmt.Errorf("failed to get logs from Loki: %s", resp.Status)
 	}
 
 	var lokiResp LokiQueryRangeResponse
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	err = json.Unmarshal(body, &lokiResp)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	if len(lokiResp.Data.Result) > 0 {
-		return time.Since(podInfo.StartTime), nil
+		now := time.Now()
+		timeDiff := now.Sub(podInfo.StartTime)
+		log.Printf("First log line for pod %s in namespace %s: (Time difference: %s)", podInfo.PodName, podInfo.Namespace, timeDiff)
+		return nil
 	}
 
-	return 0, fmt.Errorf("no logs found for pod %s", podInfo.PodName)
+	return fmt.Errorf("no logs found for pod %s", podInfo.PodName)
 }
 
 func main() {
@@ -131,72 +151,56 @@ func main() {
 		log.Fatalf("Error creating Kubernetes client: %v", err)
 	}
 
-	var podQueue = make(chan PodInfo, 10000)
-	var wg sync.WaitGroup
-	var loggedPods = make(map[string]bool)
-	var loggedPodsMutex sync.Mutex
-
-	// Update the pod queue
-	go func() {
-		for {
-			namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
-			if err != nil {
-				log.Fatalf("Failed to list namespaces: %v", err)
-			}
-
-			for _, namespace := range namespaces.Items {
-				if !isTargetNamespace(namespace.Name, config.NamespacePrefix) {
-					continue
-				}
-
-				pods, err := clientset.CoreV1().Pods(namespace.Name).List(context.TODO(), v1.ListOptions{})
-				if err != nil {
-					log.Fatalf("Failed to list pods in namespace %s: %v", namespace.Name, err)
-				}
-
-				for _, pod := range pods.Items {
-					if pod.Status.StartTime != nil {
-						podInfo := PodInfo{
-							Namespace: namespace.Name,
-							PodName:   pod.Name,
-							StartTime: pod.Status.StartTime.Time,
-						}
-						podQueue <- podInfo
-					}
-				}
-			}
-			time.Sleep(10 * time.Second)
-		}
-	}()
-
-	// Process the pod queue
-	for i := 0; i < 10; i++ { // Start 10 worker goroutines
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for podInfo := range podQueue {
-				loggedPodsMutex.Lock()
-				if _, exists := loggedPods[podInfo.Namespace+"/"+podInfo.PodName]; exists {
-					loggedPodsMutex.Unlock()
-					continue
-				}
-				loggedPodsMutex.Unlock()
-
-				logAvailabilityDuration, err := getLogAvailabilityDuration(podInfo, config.LokiAddress)
-				if err != nil {
-					continue
-				}
-
-				log.Printf("Pod %s in namespace %s started at %s. Logs were available after %s.", podInfo.PodName, podInfo.Namespace, podInfo.StartTime.Format(time.RFC3339), logAvailabilityDuration)
-
-				loggedPodsMutex.Lock()
-				loggedPods[podInfo.Namespace+"/"+podInfo.PodName] = true
-				loggedPodsMutex.Unlock()
-			}
-		}()
+	jobQueue := JobQueue{
+		loggedPods: make(map[string]bool),
 	}
 
-	wg.Wait()
+	for {
+		namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
+		if err != nil {
+			log.Fatalf("Failed to list namespaces: %v", err)
+		}
+
+		for _, namespace := range namespaces.Items {
+			if !isTargetNamespace(namespace.Name, config.NamespacePrefix) {
+				continue
+			}
+
+			pods, err := clientset.CoreV1().Pods(namespace.Name).List(context.TODO(), v1.ListOptions{})
+			if err != nil {
+				log.Fatalf("Failed to list pods in namespace %s: %v", namespace.Name, err)
+			}
+
+			for _, pod := range pods.Items {
+				if pod.Status.StartTime != nil && !jobQueue.IsPodLogged(PodInfo{
+					Namespace: namespace.Name,
+					PodName:   pod.Name,
+					StartTime: pod.Status.StartTime.Time,
+				}) {
+					podInfo := PodInfo{
+						Namespace: namespace.Name,
+						PodName:   pod.Name,
+						StartTime: pod.Status.StartTime.Time,
+					}
+					jobQueue.AddPodToQueue(podInfo)
+				}
+			}
+		}
+
+		for {
+			podInfo, ok := jobQueue.GetPodFromQueue()
+			if !ok {
+				break
+			}
+
+			err := getLokiLogs(podInfo, config.LokiAddress)
+			if err != nil {
+				log.Printf("Error getting logs for pod %s in namespace %s: %v", podInfo.PodName, podInfo.Namespace, err)
+			} else {
+				jobQueue.MarkPodAsLogged(podInfo)
+			}
+		}
+	}
 }
 
 func isTargetNamespace(namespaceName, namespacePrefix string) bool {
