@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
+	"syscall"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -166,7 +168,11 @@ func main() {
 	}
 
 	var loggedPods []LoggedPodInfo
-	emptyQueueCount := 0
+
+	// Set up signal handling
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+
 	for {
 		namespaces, err := clientset.CoreV1().Namespaces().List(context.TODO(), v1.ListOptions{})
 		if err != nil {
@@ -202,12 +208,6 @@ func main() {
 		for {
 			podInfo, ok := jobQueue.GetPodFromQueue()
 			if !ok {
-				emptyQueueCount++
-				if emptyQueueCount >= 3 {
-					fmt.Println("Program is terminating as the job queue has been empty 3 times.")
-					printLoggedPods(loggedPods)
-					return
-				}
 				break
 			}
 
@@ -218,6 +218,15 @@ func main() {
 				jobQueue.MarkPodAsLogged(podInfo)
 				loggedPods = append(loggedPods, loggedPodInfo)
 			}
+		}
+
+		select {
+		case sig := <-sigChan:
+			fmt.Printf("Received signal: %v\n", sig)
+			printLoggedPods(loggedPods)
+			return
+		default:
+			// Continue the loop
 		}
 	}
 }
