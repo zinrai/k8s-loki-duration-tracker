@@ -224,6 +224,7 @@ func main() {
 		case sig := <-sigChan:
 			fmt.Printf("Received signal: %v\n", sig)
 			printLoggedPods(loggedPods)
+			printLoggedPodsWithTimeDiffStats(loggedPods)
 			return
 		default:
 			// Continue the loop
@@ -239,4 +240,30 @@ func printLoggedPods(loggedPods []LoggedPodInfo) {
 	for _, podInfo := range loggedPods {
 		fmt.Printf("Namespace: %s, Pod: %s, Time Difference: %s\n", podInfo.Namespace, podInfo.PodName, podInfo.TimeDiff)
 	}
+}
+
+func printLoggedPodsWithTimeDiffStats(loggedPods []LoggedPodInfo) {
+	if len(loggedPods) == 0 {
+		fmt.Println("No logged pods found.")
+		return
+	}
+
+	var maxTimeDiff, minTimeDiff time.Duration
+	var totalTimeDiff time.Duration
+	maxTimeDiff = loggedPods[0].TimeDiff
+	minTimeDiff = loggedPods[0].TimeDiff
+
+	for _, podInfo := range loggedPods {
+		fmt.Printf("Namespace: %s, Pod: %s, Time Difference: %s\n", podInfo.Namespace, podInfo.PodName, podInfo.TimeDiff)
+		totalTimeDiff += podInfo.TimeDiff
+		if podInfo.TimeDiff > maxTimeDiff {
+			maxTimeDiff = podInfo.TimeDiff
+		}
+		if podInfo.TimeDiff < minTimeDiff {
+			minTimeDiff = podInfo.TimeDiff
+		}
+	}
+
+	meanTimeDiff := time.Duration(int64(totalTimeDiff) / int64(len(loggedPods)))
+	fmt.Printf("\nMax Time Difference: %s\nMin Time Difference: %s\nMean Time Difference: %s\n", maxTimeDiff, minTimeDiff, meanTimeDiff)
 }

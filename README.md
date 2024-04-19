@@ -111,59 +111,56 @@ EOF
 
 ```bash
 $ go run main.go
-2024/04/17 17:18:42 Error getting logs for pod logger-pod-1 in namespace logger-ns-1: no logs found for pod logger-pod-1
-2024/04/17 17:18:42 Error getting logs for pod logger-pod-2 in namespace logger-ns-5: no logs found for pod logger-pod-2
-2024/04/17 17:18:44 Error getting logs for pod logger-pod-1 in namespace logger-ns-1: no logs found for pod logger-pod-1
-2024/04/17 17:18:44 Error getting logs for pod logger-pod-2 in namespace logger-ns-5: no logs found for pod logger-pod-2
-2024/04/17 17:18:46 First log line for pod logger-pod-1 in namespace logger-ns-1: (Time difference: 7.783215399s)
-2024/04/17 17:18:46 Error getting logs for pod logger-pod-3 in namespace logger-ns-3: no logs found for pod logger-pod-3
-2024/04/17 17:18:46 First log line for pod logger-pod-2 in namespace logger-ns-5: (Time difference: 5.844791982s)
-2024/04/17 17:18:49 Error getting logs for pod logger-pod-4 in namespace logger-ns-1: no logs found for pod logger-pod-4
-2024/04/17 17:18:49 Error getting logs for pod logger-pod-3 in namespace logger-ns-3: no logs found for pod logger-pod-3
-2024/04/17 17:18:51 First log line for pod logger-pod-4 in namespace logger-ns-1: (Time difference: 5.202028568s)
-2024/04/17 17:18:51 Error getting logs for pod logger-pod-5 in namespace logger-ns-10: no logs found for pod logger-pod-5
-2024/04/17 17:18:51 First log line for pod logger-pod-3 in namespace logger-ns-3: (Time difference: 7.319506151s)
-2024/04/17 17:18:53 Error getting logs for pod logger-pod-5 in namespace logger-ns-10: no logs found for pod logger-pod-5
-2024/04/17 17:18:53 Error getting logs for pod logger-pod-6 in namespace logger-ns-3: no logs found for pod logger-pod-6
-2024/04/17 17:18:53 Error getting logs for pod logger-pod-7 in namespace logger-ns-9: no logs found for pod logger-pod-7
-2024/04/17 17:18:55 Error getting logs for pod logger-pod-5 in namespace logger-ns-10: no logs found for pod logger-pod-5
-2024/04/17 17:18:55 Error getting logs for pod logger-pod-6 in namespace logger-ns-3: no logs found for pod logger-pod-6
+2024/04/19 09:14:03 Error getting logs for pod logger-pod-3 in namespace logger-ns-1: no logs found for pod logger-pod-3
+2024/04/19 09:14:04 Error getting logs for pod logger-pod-5 in namespace logger-ns-1: no logs found for pod logger-pod-5
+2024/04/19 09:14:04 First log line for pod logger-pod-1 in namespace logger-ns-10: (Time difference: 7.481053523s)
+2024/04/19 09:14:04 Error getting logs for pod logger-pod-6 in namespace logger-ns-4: no logs found for pod logger-pod-6
+2024/04/19 09:14:04 Error getting logs for pod logger-pod-9 in namespace logger-ns-4: no logs found for pod logger-pod-9
+2024/04/19 09:14:04 First log line for pod logger-pod-2 in namespace logger-ns-8: (Time difference: 6.924065065s)
+2024/04/19 09:14:05 First log line for pod logger-pod-4 in namespace logger-ns-9: (Time difference: 6.288570148s)
+2024/04/19 09:14:05 Error getting logs for pod logger-pod-7 in namespace logger-ns-9: no logs found for pod logger-pod-7
+2024/04/19 09:14:05 First log line for pod logger-pod-3 in namespace logger-ns-1: (Time difference: 7.673499773s)
+2024/04/19 09:14:05 Error getting logs for pod logger-pod-5 in namespace logger-ns-1: no logs found for pod logger-pod-5
+2024/04/19 09:14:05 Error getting logs for pod logger-pod-8 in namespace logger-ns-1: no logs found for pod logger-pod-8
+2024/04/19 09:14:05 Error getting logs for pod logger-pod-6 in namespace logger-ns-4: no logs found for pod logger-pod-6
+2024/04/19 09:14:05 Error getting logs for pod logger-pod-9 in namespace logger-ns-4: no logs found for pod logger-pod-9
+2024/04/19 09:14:06 Error getting logs for pod logger-pod-7 in namespace logger-ns-9: no logs found for pod logger-pod-7
+2024/04/19 09:14:07 Error getting logs for pod logger-pod-5 in namespace logger-ns-1: no logs found for pod logger-pod-5
+2024/04/19 09:14:07 First log line for pod logger-pod-8 in namespace logger-ns-1: (Time difference: 4.905360316s)
+2024/04/19 09:14:07 Error getting logs for pod logger-pod-6 in namespace logger-ns-4: no logs found for pod logger-pod-6
 ...
+2024/04/19 10:13:22 Error getting logs for pod logger-pod-3335 in namespace logger-ns-7: no logs found for pod logger-pod-3335
+2024/04/19 10:13:22 Error getting logs for pod logger-pod-3337 in namespace logger-ns-7: no logs found for pod logger-pod-3337
+2024/04/19 10:13:24 Error getting logs for pod logger-pod-3338 in namespace logger-ns-10: no logs found for pod logger-pod-3338
+2024/04/19 10:13:24 Error getting logs for pod logger-pod-3340 in namespace logger-ns-10: no logs found for pod logger-pod-3340
+2024/04/19 10:13:59 First log line for pod logger-pod-3368 in namespace logger-ns-4: (Time difference: 8.503452195s)
+2024/04/19 10:13:59 Error getting logs for pod logger-pod-3372 in namespace logger-ns-4: no logs found for pod logger-pod-3372
+2024/04/19 10:13:59 First log line for pod logger-pod-3371 in namespace logger-ns-6: (Time difference: 4.560198237s)
+2024/04/19 10:13:59 First log line for pod logger-pod-3370 in namespace logger-ns-8: (Time difference: 6.590553446s)
+2024/04/19 10:14:01 First log line for pod logger-pod-3369 in namespace logger-ns-1: (Time difference: 9.670723447s)
+2024/04/19 10:14:01 Error getting logs for pod logger-pod-3372 in namespace logger-ns-4: no logs found for pod logger-pod-3372
+2024/04/19 10:14:03 First log line for pod logger-pod-3372 in namespace logger-ns-4: (Time difference: 8.869745823s)
 ^CReceived signal: interrupt
-Namespace: logger-ns-1, Pod: logger-pod-1, Time Difference: 7.783215399s
-Namespace: logger-ns-5, Pod: logger-pod-2, Time Difference: 5.844791982s
-Namespace: logger-ns-1, Pod: logger-pod-4, Time Difference: 5.202028568s
-Namespace: logger-ns-3, Pod: logger-pod-3, Time Difference: 7.319506151s
-Namespace: logger-ns-10, Pod: logger-pod-5, Time Difference: 9.799009404s
-Namespace: logger-ns-3, Pod: logger-pod-6, Time Difference: 7.872321404s
-Namespace: logger-ns-9, Pod: logger-pod-7, Time Difference: 6.033944321s
-Namespace: logger-ns-4, Pod: logger-pod-8, Time Difference: 7.181646406s
-Namespace: logger-ns-7, Pod: logger-pod-9, Time Difference: 5.334858406s
-Namespace: logger-ns-7, Pod: logger-pod-10, Time Difference: 7.63087245s
-Namespace: logger-ns-3, Pod: logger-pod-11, Time Difference: 7.803359284s
-Namespace: logger-ns-9, Pod: logger-pod-12, Time Difference: 10.192467786s
-Namespace: logger-ns-7, Pod: logger-pod-13, Time Difference: 7.63884571s
-Namespace: logger-ns-1, Pod: logger-pod-14, Time Difference: 9.410498756s
-Namespace: logger-ns-5, Pod: logger-pod-15, Time Difference: 7.414764053s
-Namespace: logger-ns-1, Pod: logger-pod-16, Time Difference: 9.79947093s
-Namespace: logger-ns-8, Pod: logger-pod-17, Time Difference: 7.939192514s
-Namespace: logger-ns-6, Pod: logger-pod-18, Time Difference: 10.352854891s
-Namespace: logger-ns-10, Pod: logger-pod-19, Time Difference: 6.633163809s
-Namespace: logger-ns-6, Pod: logger-pod-20, Time Difference: 4.696835143s
-Namespace: logger-ns-1, Pod: logger-pod-22, Time Difference: 7.194588438s
-Namespace: logger-ns-8, Pod: logger-pod-21, Time Difference: 9.311871854s
-Namespace: logger-ns-2, Pod: logger-pod-23, Time Difference: 9.60719519s
-Namespace: logger-ns-9, Pod: logger-pod-24, Time Difference: 7.00249403s
-Namespace: logger-ns-6, Pod: logger-pod-25, Time Difference: 11.012602119s
-Namespace: logger-ns-7, Pod: logger-pod-26, Time Difference: 11.358674375s
-Namespace: logger-ns-8, Pod: logger-pod-27, Time Difference: 9.392473959s
-Namespace: logger-ns-8, Pod: logger-pod-28, Time Difference: 7.6111735s
-Namespace: logger-ns-3, Pod: logger-pod-29, Time Difference: 8.067295088s
-Namespace: logger-ns-8, Pod: logger-pod-30, Time Difference: 7.065616926s
-Namespace: logger-ns-8, Pod: logger-pod-31, Time Difference: 13.08654281s
-Namespace: logger-ns-1, Pod: logger-pod-33, Time Difference: 11.559511481s
-Namespace: logger-ns-10, Pod: logger-pod-32, Time Difference: 13.613584481s
-Namespace: logger-ns-5, Pod: logger-pod-34, Time Difference: 9.789898356s
+Namespace: logger-ns-10, Pod: logger-pod-1, Time Difference: 7.481053523s
+Namespace: logger-ns-8, Pod: logger-pod-2, Time Difference: 6.924065065s
+Namespace: logger-ns-9, Pod: logger-pod-4, Time Difference: 6.288570148s
+Namespace: logger-ns-1, Pod: logger-pod-3, Time Difference: 7.673499773s
+Namespace: logger-ns-1, Pod: logger-pod-8, Time Difference: 4.905360316s
+Namespace: logger-ns-9, Pod: logger-pod-7, Time Difference: 5.112803733s
+Namespace: logger-ns-1, Pod: logger-pod-5, Time Difference: 9.102882317s
+Namespace: logger-ns-4, Pod: logger-pod-6, Time Difference: 9.156968901s
+Namespace: logger-ns-2, Pod: logger-pod-501, Time Difference: 4.554813477s
+Namespace: logger-ns-1, Pod: logger-pod-649, Time Difference: 4.542230846s
+Namespace: logger-ns-5, Pod: logger-pod-646, Time Difference: 9.979003179s
+...
+Namespace: logger-ns-8, Pod: logger-pod-3370, Time Difference: 6.590553446s
+Namespace: logger-ns-1, Pod: logger-pod-3369, Time Difference: 9.670723447s
+Namespace: logger-ns-4, Pod: logger-pod-3372, Time Difference: 8.869745823s
+
+Max Time Difference: 12.22648255s
+Min Time Difference: 2.538977783s
+Mean Time Difference: 6.791767569s
+$
 ```
 
 ## License
